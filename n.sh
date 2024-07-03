@@ -1,35 +1,25 @@
 #!/bin/bash
 
 apt update -y
-
 apt install grub2 wimtools ntfs-3g -y
 
 # Get the disk size in GB and convert to MB
 disk_size_gb=$(parted /dev/sda --script print | awk '/^Disk \/dev\/sda:/ {print int($3)}')
 disk_size_mb=$((disk_size_gb * 1024))
 
-# Calculate partition size (50% of total size)
-part_size_mb=$((disk_size_mb / 2))
+# Calculate partition size (50% of total size minus 1GB)
+part_size_mb=$((disk_size_mb / 2 - 1024))
 
 # Create GPT partition table
 parted /dev/sda --script -- mklabel gpt
 
 # Create two partitions
 parted /dev/sda --script -- mkpart primary ntfs 1MB ${part_size_mb}MB
-parted /dev/sda --script -- mkpart primary ntfs ${part_size_mb}MB $((disk_size_mb))MB
+parted /dev/sda --script -- mkpart primary ntfs ${part_size_mb}MB $((disk_size_mb - 1024))MB
 
 # Inform kernel of partition table changes
 partprobe /dev/sda
-
-sleep 30
-
-partprobe /dev/sda
-
-sleep 30
-
-partprobe /dev/sda
-
-sleep 30 
+sleep 10
 
 # Format the partitions
 mkfs.ntfs -f /dev/sda1
@@ -37,54 +27,42 @@ mkfs.ntfs -f /dev/sda2
 
 echo "NTFS partitions created"
 
-echo -e "r\ng\np\nw\nY\n" | gdisk /dev/sda
-
+# Mount the first partition
 mount /dev/sda1 /mnt
 
 # Prepare directory for the Windows disk
-cd ~
-mkdir windisk
+mkdir -p /mnt/sources/virtio
 
-mount /dev/sda2 windisk
-
+# Install GRUB
 grub-install --root-directory=/mnt /dev/sda
 
 # Edit GRUB configuration
-cd /mnt/boot/grub
-cat <<EOF > grub.cfg
-menuentry "windows installer" {
+cat <<EOF > /mnt/boot/grub/grub.cfg
+menuentry "Windows Installer" {
     insmod ntfs
-    search --set=root --file=/bootmgr
+    search --set=root --file /bootmgr
     ntldr /bootmgr
     boot
 }
 EOF
 
-cd /root/windisk
-mkdir winfile
+# Mount the Windows installation ISO
+mkdir -p /root/windisk
+mount -o loop /path/to/win10.iso /root/windisk
 
-wget https://tech.navazi.net/win10.iso -O win10.iso
+# Copy Windows files to the first partition
+rsync -avz --progress /root/windisk/* /mnt
 
-mount -o loop win10.iso winfile
+# Mount Virtio ISO and copy drivers
+mkdir -p /mnt/sources/virtio
+mount -o loop /path/to/virtio.iso /root/windisk
+rsync -avz --progress /root/windisk/* /mnt/sources/virtio
 
-rsync -avz --progress winfile/* /mnt
+# Create command file for WIM image update
+echo 'add virtio /virtio_drivers' > /mnt/sources/cmd.txt
 
-umount winfile
+# Update boot.wim with Virtio drivers
+wimlib-imagex update /mnt/sources/boot.wim 2 < /mnt/sources/cmd.txt
 
-wget -O virtio.iso https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.240-1/virtio-win-0.1.240.iso
-
-mount -o loop virtio.iso winfile
-
-mkdir /mnt/sources/virtio
-
-rsync -avz --progress winfile/* /mnt/sources/virtio
-
-cd /mnt/sources
-
-touch cmd.txt
-
-echo 'add virtio /virtio_drivers' >> cmd.txt
-
-wimlib-imagex update boot.wim 2 < cmd.txt
-
+# Reboot the system
 reboot
