@@ -8,7 +8,7 @@ disk_size_gb=$(parted /dev/sda --script print | awk '/^Disk \/dev\/sda:/ {print 
 disk_size_mb=$((disk_size_gb * 1024))
 
 #Calculate partition size (40% of total size)
-part_size_mb=$((disk_size_mb / 2.5))
+part_size_mb=$((disk_size_mb * 10 / 25))
 
 #Create GPT partition table
 parted /dev/sda --script -- mklabel gpt
