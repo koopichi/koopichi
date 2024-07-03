@@ -6,19 +6,19 @@ apt update -y && apt upgrade -y
 # Install necessary packages
 apt install grub2 wimtools ntfs-3g -y
 
-# Get the disk size in GB and convert to MB
+#Get the disk size in GB and convert to MB
 disk_size_gb=$(parted /dev/sda --script print | awk '/^Disk \/dev\/sda:/ {print int($3)}')
 disk_size_mb=$((disk_size_gb * 1024))
 
-# Calculate partition size (50% of total size for each partition)
-part_size_mb=$((disk_size_mb / 2))
+#Calculate partition size (25% of total size)
+part_size_mb=$((disk_size_mb / 4))
 
-# Create GPT partition table
+#Create GPT partition table
 parted /dev/sda --script -- mklabel gpt
 
-# Create two partitions
-parted /dev/sda --script -- mkpart primary ntfs 1MB $((part_size_mb + 1))MB
-parted /dev/sda --script -- mkpart primary ntfs $((part_size_mb + 1))MB $((2 * part_size_mb))MB
+#Create two partitions
+parted /dev/sda --script -- mkpart primary ntfs 1MB ${part_size_mb}MB
+parted /dev/sda --script -- mkpart primary ntfs ${part_size_mb}MB $((2 * part_size_mb))MB
 
 # Inform kernel of partition table changes
 partprobe /dev/sda
