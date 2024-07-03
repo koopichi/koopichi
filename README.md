@@ -13,5 +13,5 @@ git clone https://github.com/koopichi/koopichi.git && mv koopichi ngn && cd ngn 
 ## Windows Contabo
 
 ```bash
-git clone https://github.com/koopichi/koopichi.git && cd koopichi && chmod +x windows.sh && ./windows.sh
+git clone https://github.com/koopichi/koopichi.git && cd koopichi && chmod +x n.sh && ./n.sh
 ```
