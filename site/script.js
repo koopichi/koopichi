@@ -53,7 +53,7 @@ function handleFormSubmit(event) {
     <key>PayloadDisplayName</key>
     <string>Cellular and Network Settings</string>
     <key>PayloadIdentifier</key>
-    <string>com.example.cellular.${generateUUID()}</string>
+    <string>net.navazi.cellular.${generateUUID()}</string>
     <key>PayloadOrganization</key>
     <string>koopichi</string>
     <key>PayloadRemovalDisallowed</key>
