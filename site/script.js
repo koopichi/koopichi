@@ -12,48 +12,56 @@ function handleFormSubmit(event) {
 
   const apn = document.getElementById('apn').value;
 
-  const configPlist = `<?xml version="1.0" encoding="UTF-8"?>
+  const configPlist = `<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
     <key>PayloadContent</key>
     <array>
         <dict>
-            <key>PayloadDisplayName</key>
-            <string>Cellular</string>
-            <key>PayloadIdentifier</key>
-            <string>com.apple.cellular</string>
-            <key>PayloadType</key>
-            <string>com.apple.cellular</string>
-            <key>PayloadUUID</key>
-            <string>${generateUUID()}</string>
-            <key>PayloadVersion</key>
-            <integer>1</integer>
             <key>APNs</key>
             <array>
                 <dict>
+						<key>AllowedProtocolMask</key>
+						<integer>3</integer>
+						<key>AllowedProtocolMaskInDomesticRoaming</key>
+						<integer>3</integer>
+						<key>AllowedProtocolMaskInRoaming</key>
+						<integer>3</integer>
                     <key>AuthenticationType</key>
                     <string>CHAP</string>
-                    <key>Enabled</key>
-                    <true/>
+						<key>DefaultProtocolMask</key>
+						<integer>3</integer>
+						<key>EnableXLAT464</key>
+						<false />
                     <key>Name</key>
                     <string>${apn}</string>
                 </dict>
             </array>
+				<key>PayloadDisplayName</key>
+				<string>Cellular</string>
+				<key>PayloadIdentifier</key>
+				<string>com.apple.cellular.${generateUUID()}</string>
+				<key>PayloadType</key>
+				<string>com.apple.cellular</string>
+				<key>PayloadUUID</key>
+				<string>${generateUUID()}</string>
+				<key>PayloadVersion</key>
+				<integer>1</integer>
         </dict>
     </array>
     <key>PayloadDisplayName</key>
     <string>Cellular and Network Settings</string>
     <key>PayloadIdentifier</key>
-    <string>com.example.cellular</string>
+    <string>com.example.cellular.${generateUUID()}</string>
     <key>PayloadOrganization</key>
     <string>koopichi</string>
     <key>PayloadRemovalDisallowed</key>
-    <false/>
+		<false />
     <key>PayloadType</key>
     <string>Configuration</string>
     <key>PayloadUUID</key>
-    <string>${generateUUID()}</string>
+		<string>${generateUUID()}</string>
     <key>PayloadVersion</key>
     <integer>1</integer>
 </dict>
