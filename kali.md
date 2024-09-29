@@ -62,7 +62,7 @@
    Install the Full Kali Linux System:
 
    ```
-   apt install kali-linux-full
+   apt install kali-desktop-gnome
    ```
    Install GRUB:
    
